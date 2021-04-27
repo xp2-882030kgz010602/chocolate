@@ -112,12 +112,9 @@ var check=function(pat,z,w){
     }
   }
   while(true){
-    //if(!rule_smallest(transitionintegers)){
-        //console.log("Test");
-    //}
     var transitionslist=[];
-    var unbounded=1;
-    var B1cs=1;
+    var unbounded=0;
+    var B1cs=0;
     transitionintegers[0]+=16;
     var large=rule_largest(transitionintegers);//Why check both rule cycle 1,2,3,4 and rule cycle 2,3,4,1?
     transitionintegers[0]-=16;
@@ -127,9 +124,9 @@ var check=function(pat,z,w){
         var B1e;
         var B2a;
         var B2c;
-       var B3i;
+        var B3i;
         var transitions=bin2pat(transitionintegers[i%ruleperiod]);
-        if(i%ruleperiod===0){
+        if(i%ruleperiod<horizontal){
           while(transitions.length<4){
             transitions=[0].concat(transitions);
           }
@@ -147,9 +144,9 @@ var check=function(pat,z,w){
           B2a=transitions[2];
           B2c=transitions[3];
           B3i=transitions[4];
-          unbounded+=B1c||(B1e&&B2a);
-          B1cs+=B1c;
         }
+        B1cs+=B1c;
+        unbounded+=B1c||(B1e&&B2a);
         transitionslist.push([0,B1c,B1e,B2a,B1c,B2c,B2a,B3i]);
       }
     }

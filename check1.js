@@ -69,6 +69,32 @@ var rule2bin=function(r){
     }
     return bin;
 };
+var cycle=function(x,y){
+    var cycled=[];
+    for(var i=0;i<x.length;i++){
+        cycled.push(x[(i+y)%x.length]);
+    }
+    return cycled;
+};
+var rule_smaller=function(x,y){
+    for(var i=0;i<x.length;i++){
+        if(x[i]<y[i]){
+            return true;
+        }
+        if(x[i]>y[i]){
+            return false;
+        }
+    }
+    return true;
+};
+var rule_largest=function(r){
+    for(var i=1;i<r.length;i++){
+        if(rule_smaller(r,cycle(r,i))){
+            return false;
+        }
+    }
+    return true;
+};
 var known=[];
 var check=function(pat,z,w){
   //The first <horizontal> entries MUST have B1c (16 possibilities), and the others don't care (32 possibilities).
@@ -89,38 +115,43 @@ var check=function(pat,z,w){
     var transitionslist=[];
     var unbounded=1;
     var B1cs=0;
-    for(var i=0;i<period;i++){
-      var B1c;
-      var B1e;
-      var B2a;
-      var B2c;
-      var B3i;
-      var transitions=bin2pat(transitionintegers[i%ruleperiod]);
-      if(i%ruleperiod===0){
-        while(transitions.length<4){
-          transitions=[0].concat(transitions);
+    transitionintegers[0]+=16;
+    var large=rule_largest(transitionintegers);//Why check both rule cycle 1,2,3,4 and rule cycle 2,3,4,1?
+    transitionintegers[0]-=16;
+    if(large){
+      for(var i=0;i<period;i++){
+        var B1c;
+        var B1e;
+        var B2a;
+        var B2c;
+        var B3i;
+        var transitions=bin2pat(transitionintegers[i%ruleperiod]);
+        if(i%ruleperiod<horizontal){
+          while(transitions.length<4){
+            transitions=[0].concat(transitions);
+          }
+          B1c=1;
+          B1e=transitions[0];
+          B2a=transitions[1];
+          B2c=transitions[2];
+          B3i=transitions[3];
+        }else{
+          while(transitions.length<5){
+            transitions=[0].concat(transitions);
+          }
+          B1c=transitions[0];
+          B1e=transitions[1];
+          B2a=transitions[2];
+          B2c=transitions[3];
+          B3i=transitions[4];
         }
-        B1c=1;
-        B1e=transitions[0];
-        B2a=transitions[1];
-        B2c=transitions[2];
-        B3i=transitions[3];
-      }else{
-        while(transitions.length<5){
-          transitions=[0].concat(transitions);
-        }
-        B1c=transitions[0];
-        B1e=transitions[1];
-        B2a=transitions[2];
-        B2c=transitions[3];
-        B3i=transitions[4];
+        B1cs+=B1c;
         unbounded+=B1c||(B1e&&B2a);
+        transitionslist.push([0,B1c,B1e,B2a,B1c,B2c,B2a,B3i]);
       }
-      B1cs+=B1c;
-      transitionslist.push([0,B1c,B1e,B2a,B1c,B2c,B2a,B3i]);
     }
     //console.log(B1cs);
-    if(unbounded<period&&B1cs>=horizontal){///If <unbounded> equals <period>, then B1c or B1e2a exist in all generations, so the pattern explodes. If <B1cs> is less than <horizontal>, there isn't enough B1c to have the desired horizontal displacement.
+    if(unbounded<period&&B1cs>=horizontal&&large){///If <unbounded> equals <period>, then B1c or B1e2a exist in all generations, so the pattern explodes. If <B1cs> is less than <horizontal>, there isn't enough B1c to have the desired horizontal displacement.
       var pat1=check1(pat,transitionslist);//&&Math.abs(pat.indexOf(1)-pat1.indexOf(1)+period)===horizontal
       for(var i=0;i<period;i++){
         pat1=[0].concat(pat1);

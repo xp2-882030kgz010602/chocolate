@@ -3,7 +3,7 @@ var config=require("./config.json");
 var width=config.width;
 var period=config.period;
 var horizontal=config.horizontal;
-var size=width+period;
+var size=width+period-1;
 var indiceslist=eval(fs.readFileSync("./indices.txt",{encoding:"utf8",flag:"r"}));
 var pat2bin=function(pat){
   var bin=0;
@@ -43,6 +43,11 @@ var extend=function(index){
   one.push(1);
   two.push(1);
   three.push(1);
+  /*console.log(pat);
+  console.log(zero);
+  console.log(one);
+  console.log(two);
+  console.log(three);*/
   return [(pat2bin(zero)-1)/2,(pat2bin(one)-1)/2,(pat2bin(two)-1)/2,(pat2bin(three)-1)/2];
 };
 var extended=[];
