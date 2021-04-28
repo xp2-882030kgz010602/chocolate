@@ -100,7 +100,10 @@ var check=function(pat,z,w){
   //The first <horizontal> entries MUST have B1c (16 possibilities), and the others don't care (32 possibilities).
   //Frontend transitions:
   //B1c B1e B2a B2c B3i
-  var hfab=false;//Has Front And Back
+  //var hfab=false;//Has Front And Back
+  var l=false;
+  var r=false;
+  var lr=false;
   var transitionintegers=[];
   var x=0;
   if(transitionintegerslist.length>0){
@@ -156,31 +159,39 @@ var check=function(pat,z,w){
         pat1=[0].concat(pat1);
         pat1.push(0);
       }
-      var f0=[];
-      var f1=[];
+      var l0=[];
+      var l1=[];
+      var r0=[];
+      var r1=[];
       for(var dx=0;dx<width;dx++){
-        f0.push(pat[2*period+dx]);
-        f1.push(pat1[2*period+dx+horizontal]);
+        l0.push(pat[2*period+dx]);
+        l1.push(pat1[2*period+dx+horizontal]);
       }
       for(var dx=0;dx<width;dx++){
-        f0.push(pat[2*period+length+dx-width]);
-        f1.push(pat1[2*period+length+dx+horizontal-width]);
+        r0.push(pat[2*period+length+dx-width]);
+        r1.push(pat1[2*period+length+dx+horizontal-width]);
       }
       //console.log(2*period+length+horizontal-width);
-      var leak=false;
+      var leakl=false;
+      var leakr=false;
       for(var i=0;i<2*period+horizontal;i++){
         if(pat1[i]){
-          leak=true;
+          leakl=true;
           break;
         }
       }
       for(var i=2*period+length+horizontal;i<4*period+length;i++){
         if(pat1[i]){
-          leak=true;
+          leakr=true;
           break;
         }
       }
-      if(JSON.stringify(f0)===JSON.stringify(f1)&&!leak){
+      var matchl=(JSON.stringify(l0)===JSON.stringify(l1)&&!leakl);
+      var matchr=(JSON.stringify(r0)===JSON.stringify(r1)&&!leakr);
+      l=l||matchl;
+      r=r||matchr;
+      lr=lr||(matchl&&matchr);
+      if(matchl&&matchr){
         var pat2=JSON.parse(JSON.stringify(pat));
         for(var i=0;i<period;i++){
           //console.log(pat2);
@@ -203,7 +214,7 @@ var check=function(pat,z,w){
         if(rules.indexOf(JSON.stringify(transitionintegers))===-1){
           rules.push(JSON.stringify(transitionintegers));
         }
-        hfab=true;
+        //hfab=true;
         //console.log(pat2);
         /*console.log(pat);
         console.log(pat1);
@@ -217,7 +228,7 @@ var check=function(pat,z,w){
     //console.log(transitionintegers);
     if(transitionintegerslist.length>0){
       if(x===transitionintegerslist.length){
-        return hfab;
+        return [l,r,lr];
       }
       transitionintegers=transitionintegerslist[x];
       x+=1;
@@ -227,13 +238,13 @@ var check=function(pat,z,w){
        transitionintegers[i]=0;
        i+=1;
        if(i===ruleperiod){
-         return hfab;
+         return [l,r,lr];
        }
        transitionintegers[i]+=1;
       }
     }
   }
-  return hfab;
+  return [l,r,lr];
 }
 //console.log(check1([0,0,0,0,1,1,0,1,0,0,0,0],[1,0,1,0],[1,0,1,0]));
 //console.log("Test");
@@ -243,6 +254,7 @@ if(indiceslist.length>0){
   i=indiceslist[0];
   console.log(Math.max(0,indiceslist.indexOf(i))+"/"+indiceslist.length);
 }
+var bannedrightends=[];//These right ends work in NO rules
 while(i<Math.pow(2,length-2)){
   //console.log(i);
   var pat=bin2pat(i);
@@ -256,8 +268,12 @@ while(i<Math.pow(2,length-2)){
     pat.push(0);
   }
   //console.log(pat);
-  if(check(pat,i,indiceslist.indexOf(i))){
+  var match=check(pat,i,indiceslist.indexOf(i));
+  if(match[2]){
     indices.push(i);
+  }
+  if(!match[1]&&indiceslist.length===0){
+    bannedrightends.push(i%Math.pow(2,period-horizontal-1+width));
   }
   if(i%step===0){
     if(indiceslist.length===0){
@@ -275,7 +291,17 @@ while(i<Math.pow(2,length-2)){
       i=indiceslist[x];
     }
   }else{
-    i+=1;
+    if(match[2]||match[0]){
+      i+=1;
+    }else{
+      if(!match[0]){//Illegal left end, skip to the next one
+        i-=i%Math.pow(2,period-horizontal-1+width);
+        i+=Math.pow(2,period-horizontal-1+width);
+      }
+    }
+    while(i<Math.pow(2,length-2)&&bannedrightends.indexOf(i%Math.pow(2,period-horizontal-1+width))>-1){
+      i+=1;
+    }
   }
 }
 if(indiceslist.length===0){
