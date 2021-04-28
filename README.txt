@@ -4,7 +4,7 @@ Explanation of config.json:
 
 period: The period of the frontend. Search time increases drastically with the period-I'd say that it's roughly a 128-fold increase every time you increase m by 1. This is because 4 times as many patterns need to be tested to ensure independence of sides, and each increase in period adds another rule to the list of alternating rules. However, there are 32 symmetric 1D rules, and 32*4=128. :(
 
-Note that the program automatically dedupes cycles to avoid running patterns in the same ruleset twice. I mean things like running in rules a|b and in rules b|a.
+Note that the program automatically dedupes cycles to avoid running patterns in the same ruleset twice. I mean things like running in rules a|b and in rules b|a. This complicates time estimation.
 
 (5,1)c/5 currently takes around 48 seconds per pattern at width 1 on this computer. A possible remedy for this would be to test left and right sides independently and see which rules can support both. This would mean testing only 2^(m+n)+2^(m-n) instead of 2^(2m)=4^m patterns. For slow speeds, this is helpful. Fast speeds, not so much...
 
