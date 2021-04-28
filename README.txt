@@ -12,6 +12,8 @@ One might try running the frontend to an insane width, seeing which rules still 
 
 Using the frontend data to eliminate rulesets early on MAY reduce higher periods to searchable levels (good luck not getting a power outage for 2 months), but that's a factor that I can't calculate. All I can do is to thry to implement this change, run the searches, and get some hard data on this.
 
+That being said, there's still not much that I can do about the sheer number of rules involved in high values of m.
+
 ruleperiod: The period of the rule. For example, a (4,1)c/4 with only 2 alternating rules:
 
 x = 13, y = 9, rule = B2aci3cer4jy5e/S1e2ae3n4aknrw5r|B13inr5k/S1e2ae4z
