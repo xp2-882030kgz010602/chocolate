@@ -268,19 +268,19 @@ while(i<Math.pow(2,length-2)){
     pat.push(0);
   }
   //console.log(pat);
-  var match=check(pat,i,indiceslist.indexOf(i));
-  if(match[2]){
-    indices.push(i);
-  }
-  if(!match[1]&&indiceslist.length===0){
-    bannedrightends.push(i%Math.pow(2,period-horizontal-1+width));
-  }
   if(i%step===0){
     if(indiceslist.length===0){
       console.log(i+"/"+Math.pow(2,length-2));
     }else{
       console.log(Math.max(0,indiceslist.indexOf(i))+"/"+indiceslist.length);
     }
+  }
+  var match=check(pat,i,indiceslist.indexOf(i));
+  if(match[2]){
+    indices.push(i);
+  }
+  if(!match[1]&&indiceslist.length===0){
+    bannedrightends.push(i%Math.pow(2,period-horizontal-1+width));
   }
   if(indiceslist.length>0){
     var x=indiceslist.indexOf(i);
