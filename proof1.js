@@ -279,13 +279,19 @@ while(i<Math.pow(2,length-2)){
   if(match[2]){
     indices.push(i);
   }
-  if(!match[1]&&indiceslist.length===0){
+  if(!match[1]){
     bannedrightends.push(i%Math.pow(2,period-horizontal-1+width));
   }
   if(indiceslist.length>0){
     var x=indiceslist.indexOf(i);
     x+=1;
-    if(x>indiceslist.length){
+    var left=i-i%Math.pow(2,period-horizontal-1+width);
+    //var il=(!match[0]&&left===(indiceslist[x]-indiceslist[x]%Math.pow(2,period-horizontal-1+width)));
+    //var ir=(bannedrightends.indexOf(indiceslist[x]%Math.pow(2,period-horizontal-1+width)));
+    while(x<indiceslist.length&&((!match[0]&&left===(indiceslist[x]-indiceslist[x]%Math.pow(2,period-horizontal-1+width)))||bannedrightends.indexOf(indiceslist[x]%Math.pow(2,period-horizontal-1+width))>-1)){
+      x+=1;
+    }
+    if(x>=indiceslist.length){
       i=Infinity;
     }else{
       i=indiceslist[x];
