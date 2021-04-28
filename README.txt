@@ -6,9 +6,11 @@ period: The period of the frontend. Search time increases drastically with the p
 
 Note that the program automatically dedupes cycles to avoid running patterns in the same ruleset twice. I mean things like running in rules a|b and in rules b|a. This complicates time estimation.
 
-(5,1)c/5 currently takes around 48 seconds per pattern at width 1 on this computer. A possible remedy for this would be to test left and right sides independently and see which rules can support both. This would mean testing only about 2^(m+n)+2^(m-n) instead of 2^(2m)=4^m patterns (the actual numbers are proportional to this). For slow speeds, this is a bit helpful, approximately reducing the factor of 128 to 64, as the number of patterns needed now only doubles instead of quadrupling. Fast speeds, not so much, since as n approaches m, we approach 4^m anyways.
+(5,1)c/5 currently takes around 48 seconds per pattern at width 1 on this computer. A possible remedy for this would be to test left and right sides independently and see which rules can support both. This would mean testing only about 2^(m+n)+2^(m-n) instead of 2^(2m)=4^m patterns (the actual numbers are proportional to this). For slow speeds, this is a bit helpful, approximately reducing the factor of 128 to 64, as the number of patterns needed now only doubles instead of quadrupling. For fast speeds, not so much, since as n approaches m, we approach 4^m anyways. But fast speeds have their own speedup-if B1c doesn't appear at least n times, then the rule can't possible support (m,n)c/m frontends.
 
 One might try running the frontend to an insane width, seeing which rules still can support one, then using that for speeding up the search for the backend. However, the factor of 32 is non-negotiable, period. My best guess is that (5,1)c/5 would take around 12 hours now, but this change would bump it down to around 45 minutes (4^5 vs. 2^6+2^4). (6,1)c/6 would be reduced from around 2 months to 2 days. Unfortunately, (7,1)c/7 is going to still be a problem. Ugh.
+
+Using the frontend data to eliminate rulesets early on MAY reduce higher periods to searchable levels (good luck not getting a power outage for 2 months), but that's a factor that I can't calculate. All I can do is to thry to implement this change, run the searches, and get some hard data on this.
 
 ruleperiod: The period of the rule. For example, a (4,1)c/4 with only 2 alternating rules:
 
