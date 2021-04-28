@@ -14,6 +14,8 @@ Using the frontend data to eliminate rulesets early on MAY reduce higher periods
 
 That being said, there's still not much that I can do about the sheer number of rules involved in high values of m.
 
+UPDATE: I have implemented a way to skip illegal left and right sides of potential frontends. If an illegal left side is detected, the program skips to the next left side. If an illegal right side is detected, the program skips until it finds a legal one. This is possible because the function that checks if the left and the right sides match their predecessors now keeps track of patterns where one side might match but not the other. If one side never matches, then we know it can't be on that side of a frontend, because it wouldn't match.
+
 ruleperiod: The period of the rule. For example, a (4,1)c/4 with only 2 alternating rules:
 
 x = 13, y = 9, rule = B2aci3cer4jy5e/S1e2ae3n4aknrw5r|B13inr5k/S1e2ae4z
