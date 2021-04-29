@@ -6,6 +6,7 @@ var horizontal=config.horizontal;
 var width=config.width;
 var step=config.step;
 var length=2*(width+period);
+var noprint=config.noprint;
 var transitionintegerslist=eval(fs.readFileSync("./rules.txt",{encoding:"utf8",flag:"r"}));
 var indiceslist=eval(fs.readFileSync("./indices.txt",{encoding:"utf8",flag:"r"}));
 var evolve=function(x,trans){
@@ -96,6 +97,21 @@ var rule_largest=function(r){
     }
     return true;
 };
+var seen=[];//If we see each right end, we know exactly what rules we need to search.
+//console.log("Test");
+var visible=Math.pow(2,period-horizontal-1+width);
+if(indiceslist.length>0){
+  visible=0;
+  var s=[];
+  for(var i=0;i<indiceslist.length;i++){
+    if(s.indexOf(indiceslist[i]%Math.pow(2,period-horizontal-1+width))===-1){
+      s.push(indiceslist[i]%Math.pow(2,period-horizontal-1+width));
+    }
+  }
+  visible=s.length;
+}
+var rer=[];//Right End Rules
+var converted=false;
 var check=function(pat,z,w){
   //The first <horizontal> entries MUST have B1c (16 possibilities), and the others don't care (32 possibilities).
   //Frontend transitions:
@@ -104,6 +120,7 @@ var check=function(pat,z,w){
   var l=false;
   var r=false;
   var lr=false;
+  var nre=false;//New Right End
   var transitionintegers=[];
   var x=0;
   if(transitionintegerslist.length>0){
@@ -114,6 +131,7 @@ var check=function(pat,z,w){
       transitionintegers.push(0);
     }
   }
+  //console.log("Test");
   while(true){
     var transitionslist=[];
     var unbounded=0;
@@ -122,6 +140,12 @@ var check=function(pat,z,w){
     var large=rule_largest(transitionintegers);//Why check both rule cycle 1,2,3,4 and rule cycle 2,3,4,1?
     transitionintegers[0]-=16;
     if(large){
+      if(!converted&&seen.indexOf(z%Math.pow(2,period-horizontal-1+width))===-1){
+        seen.push(z%Math.pow(2,period-horizontal-1+width));
+        nre=true;
+        //console.log(seen.length);
+        //console.log(Math.pow(2,period-horizontal-1+width));
+      }
       for(var i=0;i<period;i++){
         var B1c;
         var B1e;
@@ -191,26 +215,37 @@ var check=function(pat,z,w){
       l=l||matchl;
       r=r||matchr;
       lr=lr||(matchl&&matchr);
+      if(matchr){
+        if(rer.indexOf(JSON.stringify(transitionintegers))===-1&&!converted){
+          //console.log(incomplete+" "+seen.length+" "+visible);
+          rer.push(JSON.stringify(transitionintegers));
+          //console.log(transitionintegers);
+        }
+      }
       if(matchl&&matchr){
         var pat2=JSON.parse(JSON.stringify(pat));
-        for(var i=0;i<period;i++){
-          //console.log(pat2);
+        if(!noprint){
+          for(var i=0;i<period;i++){
+            //console.log(pat2);
+            console.log(pat2rle(pat2));
+            pat2=evolve(pat2,transitionslist[i]);
+          }
           console.log(pat2rle(pat2));
-          pat2=evolve(pat2,transitionslist[i]);
         }
-        console.log(pat2rle(pat2));
         var ruleints=JSON.parse(JSON.stringify(transitionslist));
         for(var i=0;i<period;i++){
             ruleints[i]=rule2bin(ruleints[i]);
         }
-        if(w===-1){
-          console.log("Pattern "+z+"/"+Math.pow(2,length-2));
-        }else{
-          console.log("Pattern "+z+"("+w+"/"+indiceslist.length+")");
+        if(!noprint){
+          if(w===-1){
+            console.log("Pattern "+z+"/"+Math.pow(2,length-1));
+          }else{
+            console.log("Pattern "+z+"("+w+"/"+indiceslist.length+")");
+          }
+          console.log(JSON.stringify(ruleints));
+          console.log(JSON.stringify(transitionintegers));
+          console.log(JSON.stringify(transitionslist));
         }
-        console.log(JSON.stringify(ruleints));
-        console.log(JSON.stringify(transitionintegers));
-        console.log(JSON.stringify(transitionslist));
         if(rules.indexOf(JSON.stringify(transitionintegers))===-1){
           rules.push(JSON.stringify(transitionintegers));
         }
@@ -256,6 +291,15 @@ if(indiceslist.length>0){
 }
 var bannedrightends=[];//These right ends work in NO rules
 while(i<Math.pow(2,length-2)){
+  //console.log(rer.length);
+  if(seen.length===visible&&!converted){
+    //console.log("Test");
+    converted=true;
+    for(var j=0;j<rer.length;j++){
+      rer[j]=JSON.parse(rer[j]);
+    }
+    transitionintegerslist=JSON.parse(JSON.stringify(rer));
+  }
   //console.log(i);
   var pat=bin2pat(i);
   while(pat.length<length-2){
@@ -278,6 +322,7 @@ while(i<Math.pow(2,length-2)){
   var match=check(pat,i,indiceslist.indexOf(i));
   if(match[2]){
     indices.push(i);
+    //console.log("Test");
   }
   if(!match[1]){
     bannedrightends.push(i%Math.pow(2,period-horizontal-1+width));
@@ -315,17 +360,21 @@ if(indiceslist.length===0){
 }else{
   console.log(x+"/"+indiceslist.length);
 }
-console.log(JSON.stringify(indices));
-fs.writeFileSync("./indices.txt",JSON.stringify(indices));
+if(!noprint){
+  console.log(JSON.stringify(indices));
+}
+//fs.writeFileSync("./indices.txt",JSON.stringify(indices));
 for(var i=0;i<rules.length;i++){
   rules[i]=JSON.parse(rules[i]);
 }
-console.log(JSON.stringify(rules));
-fs.writeFileSync("./rules.txt",JSON.stringify(rules));
+if(!noprint){
+  console.log(JSON.stringify(rules));
+}
+//fs.writeFileSync("./rules.txt",JSON.stringify(rules));
 console.log("Indices: "+indices.length);
 console.log("Rules: "+rules.length);
 console.log("Extending patterns from w"+width+" to w"+(width+1)+"...");
-var exec = require('child_process').exec,child;
+/*var exec = require('child_process').exec,child;
 child = exec('node ./extend.js',
 function (error, stdout, stderr) {
     console.log('stdout: ' + stdout);
@@ -333,4 +382,4 @@ function (error, stdout, stderr) {
     if (error !== null) {
         console.log(error);
     }
-});
+});*/
