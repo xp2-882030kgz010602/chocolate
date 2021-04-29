@@ -4,6 +4,7 @@ var period=config.period;
 var ruleperiod=config.ruleperiod;
 var horizontal=config.horizontal;
 var step=config.step;
+var noprint=config.noprint;
 var transitionintegerslist=eval(fs.readFileSync("./rules.txt",{encoding:"utf8",flag:"r"}));
 var indiceslist=[];
 //var indiceslist=eval(fs.readFileSync("./indices.txt",{encoding:"utf8",flag:"r"}));
@@ -113,7 +114,7 @@ var check=function(pat,z,w){
   }
   while(true){
     var transitionslist=[];
-    var unbounded=1;
+    var unbounded=0;
     var B1cs=0;
     transitionintegers[0]+=16;
     var large=rule_largest(transitionintegers);//Why check both rule cycle 1,2,3,4 and rule cycle 2,3,4,1?
@@ -152,6 +153,7 @@ var check=function(pat,z,w){
     }
     //console.log(B1cs);
     if(unbounded<period&&B1cs>=horizontal&&large){///If <unbounded> equals <period>, then B1c or B1e2a exist in all generations, so the pattern explodes. If <B1cs> is less than <horizontal>, there isn't enough B1c to have the desired horizontal displacement.
+      //console.log("Test");
       var pat1=check1(pat,transitionslist);//&&Math.abs(pat.indexOf(1)-pat1.indexOf(1)+period)===horizontal
       for(var i=0;i<period;i++){
         pat1=[0].concat(pat1);
@@ -179,23 +181,25 @@ var check=function(pat,z,w){
         if(known.indexOf(seq)===-1){
           known.push(seq);
           fs.appendFileSync("./frontends.txt",seq+"\n\n");
-          var ruleints=JSON.parse(JSON.stringify(transitionslist));
-          for(var i=0;i<period;i++){
-              //console.log(rule2bin(ruleints[i]))
-              ruleints[i]=rule2bin(ruleints[i]);
+          if(!noprint){
+            var ruleints=JSON.parse(JSON.stringify(transitionslist));
+            for(var i=0;i<period;i++){
+                //console.log(rule2bin(ruleints[i]))
+                ruleints[i]=rule2bin(ruleints[i]);
+            }
+            if(w===-1){
+              console.log("Pattern "+z);
+            }else{
+              console.log("Pattern "+z+"("+w+"/"+indiceslist.length+")");
+            }
+            console.log(seq);
+            console.log(ruleints);
+            console.log(transitionintegers);
+            console.log(transitionslist);
           }
-          if(w===-1){
-            console.log("Pattern "+z);
-          }else{
-            console.log("Pattern "+z+"("+w+"/"+indiceslist.length+")");
-          }
-          console.log(seq);
-          console.log(ruleints);
-          console.log(transitionintegers);
-          console.log(transitionslist);
-          if(rules.indexOf(JSON.stringify(transitionintegers))===-1){
-            rules.push(JSON.stringify(transitionintegers));
-          }
+          //if(rules.indexOf(JSON.stringify(transitionintegers))===-1){
+            //rules.push(JSON.stringify(transitionintegers));
+          //}
           hfab=true;
         }
       }
