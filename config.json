@@ -1,1 +1,1 @@
-{"period":4,"ruleperiod":4,"horizontal":1,"width":1,"step":8,"stepfactor":4,"noprint":false}
+{"period":5,"ruleperiod":5,"horizontal":1,"width":1,"step":1,"stepfactor":4,"noprint":true,"rulethreshold":4}
