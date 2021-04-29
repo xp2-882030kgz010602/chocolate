@@ -29,6 +29,8 @@ step: How often the program will print something like 16384/262144.
 
 stepfactor: The factor that the program increases step by when increasing the width.
 
+rulethreshold: The program will print the number of rules it's searched for a pattern whenever it searches 32*16^<rulethreshold> rules.
+
 To use, just run:
 
 node proof1.js
