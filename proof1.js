@@ -158,7 +158,7 @@ var check=function(pat,z,w){
         var B2c;
         var B3i;
         var transitions=bin2pat(transitionintegers[i%ruleperiod]);
-        if(i%ruleperiod<horizontal){
+        if((i%ruleperiod)*(period/ruleperiod)<horizontal){
           while(transitions.length<4){
             transitions=[0].concat(transitions);
           }
