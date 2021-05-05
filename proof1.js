@@ -139,8 +139,8 @@ var check=function(pat,z,w){
   var rs=0;//Rules Searched
   while(true){
     var transitionslist=[];
-    var minmove=0;
-    var maxmove=0;
+    var unbounded=0;
+    var B1cs=0;
     transitionintegers[0]+=16;
     var large=rule_largest(transitionintegers);//Why check both rule cycle 1,2,3,4 and rule cycle 2,3,4,1?
     transitionintegers[0]-=16;
@@ -177,14 +177,12 @@ var check=function(pat,z,w){
           B2c=transitions[3];
           B3i=transitions[4];
         }
-        minmove+=B1c;
-        minmove*=(B1c||(B1e&&B2a));
-        maxmove+=B1c;
-        maxmove-=!B1c&&!B1e&&!B2a;
+        B1cs+=B1c;
+        unbounded+=B1c||(B1e&&B2a);
         transitionslist.push([0,B1c,B1e,B2a,B1c,B2c,B2a,B3i]);
       }
     }
-    if(minmove<=horizontal&&maxmove>=horizontal&&large){//If <unbounded> equals <period>, then B1c or B1e2a exist in all generations, so the pattern explodes. If <B1cs> is less than <horizontal>, there isn't enough B1c to have the desired horizontal displacement.
+    if(unbounded<period&&B1cs>=horizontal&&large){//If <unbounded> equals <period>, then B1c or B1e2a exist in all generations, so the pattern explodes. If <B1cs> is less than <horizontal>, there isn't enough B1c to have the desired horizontal displacement.
       var pat1=check1(pat,transitionslist);//&&Math.abs(pat.indexOf(1)-pat1.indexOf(1)+period)===horizontal
       for(var i=0;i<period;i++){
         pat1=[0].concat(pat1);
@@ -315,25 +313,10 @@ if(indiceslist.length>0&&indiceslist[0]>0){
 var bannedrightends=[];//These right ends work in NO rules
 while(i<Math.pow(2,length-2)){
   //console.log(rer.length);
-  if(rer.length>Math.pow(32,ruleperiod)/Math.pow(2,Math.ceil(horizontal*ruleperiod/period))){
-    console.log("Deduping right end rules to reduce memory usage. THIS MAY TAKE A WHILE.");
-    rer1=[];
-    rer.sort();
-    for(var j=0;j<rer.length;j++){
-      if(j===0||rer[j]!==rer[j-1]){
-        rer1.push(rer[j]);
-      }
-    }
-    console.log(rer.length+"->"+rer1.length);
-    rer=[];
-    for(var j=0;j<rer1.length;j++){
-      rer.push(rer1[j]);
-    }
-  }
   if(seen.length===visible&&!converted){
     //console.log("Test");
     converted=true;
-    console.log("Deduping right end rules to achieve speedup. THIS MAY TAKE A WHILE.");
+    console.log("Deduping right end rules to achieve speedup. This will happen only once per search, after all right end rules have been found. THIS MAY TAKE A WHILE.");
     transitionintegerslist=[];
     rer.sort();
     //console.log(rer);
@@ -405,7 +388,7 @@ while(i<Math.pow(2,length-2)){
 if(indiceslist.length===0){
   console.log(i+"/"+Math.pow(2,length-2));
 }else{
-  console.log(indiceslist.length+"/"+indiceslist.length+" (Pattern "+indiceslist[indiceslist.length-1]+"/"+Math.pow(2,length-2)+")");
+  console.log(Math.max(0,indiceslist.indexOf(i))+"/"+indiceslist.length+" (Pattern "+i+"/"+Math.pow(2,length-2)+")");
 }
 if(!noprint){
   console.log(JSON.stringify(indices));
