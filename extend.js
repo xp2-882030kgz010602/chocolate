@@ -52,7 +52,11 @@ var extend=function(index){
 };
 var extended=[];
 for(var i=0;i<indiceslist.length;i++){
-  extended=extended.concat(extend(indiceslist[i]));
+  var x=extend(indiceslist[i]);
+  for(var j=0;j<4;j++){
+    extended.push(x[j]);
+  }
+  //extended=extended.concat(extend(indiceslist[i]));
 }
 extended.sort(function(a,b){
     return a-b;
